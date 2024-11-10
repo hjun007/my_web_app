@@ -25,13 +25,13 @@
     
     <!-- 翻页按钮 -->
     <div class="flex justify-between mt-4">
-        <button onclick="showDetails(currentCommunity, {{ page - 1 }}, '{{ starttime }}', '{{ endtime }}')" 
+        <button onclick="showDetails('{{ currentCommunity }}', '{{ page - 1 }}', '{{ starttime }}', '{{ endtime }}')" 
                 class="bg-blue-500 text-white px-4 py-2 rounded {{ 'opacity-50 cursor-not-allowed' if page <= 1 else '' }}"
                 {{ 'disabled' if page <= 1 else '' }}>
             上一页
         </button>
         <span class="py-2">第 {{ page }} 页</span>
-        <button onclick="showDetails(currentCommunity, {{ page + 1 }}, '{{ starttime }}', '{{ endtime }}')" 
+        <button onclick="showDetails('{{ currentCommunity }}', '{{ page + 1 }}', '{{ starttime }}', '{{ endtime }}')" 
                 class="bg-blue-500 text-white px-4 py-2 rounded">
             下一页
         </button>

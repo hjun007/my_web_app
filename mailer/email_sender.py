@@ -2,7 +2,7 @@ from flask_mail import Mail, Message
 from flask import Flask, render_template_string
 import configparser
 import socket
-from models import EmailSubscription, Community
+from models import EmailSubscription, CommunitySubscription
 from crawler.simple_crawler import scrape_data
 import json
 from datetime import datetime
@@ -35,24 +35,25 @@ def send_email(subject, recipients, body):
         mail.send(msg)
         #print(f"邮件已发送到: {recipients}")
 
-def send_community_updates(starttime, endtime):
+def send_community_updates(id, starttime, endtime):
     """
-    发送指定时间范围内的小区更新信息给所有订阅者
+    发送指定用户ID指定时间范围内的小区更新信息给所有订阅者
     
     参数:
+    id (int): 用户ID
     starttime (str): 开始时间，格式：YYYY-MM-DD
     endtime (str): 结束时间，格式：YYYY-MM-DD
     """
-    # 获取所有邮箱订阅者
-    subscribers = EmailSubscription.query.all()
+    # 获取当前用户的邮箱订阅
+    subscribers = EmailSubscription.query.filter_by(user_id=id).all()
     if not subscribers:
-        print("没有邮箱订阅者")
+        print("当前用户没有邮箱订阅")
         return
 
     # 获取所有订阅的小区
-    communities = Community.query.all()
+    communities = CommunitySubscription.query.filter_by(user_id=id).all()
     if not communities:
-        print("没有订阅的小区")
+        print("当前用户没有订阅的小区")
         return
 
     # 构建邮件内容
