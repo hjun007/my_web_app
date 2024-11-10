@@ -36,10 +36,15 @@ def index():
                          communities=[{'id': c.id, 'name': c.name} for c in communities],
                          emails=[{'id': e.id, 'email': e.email} for e in emails])
 
+@main.route('/add-community', methods=['GET'])
+def add_community_form():
+    return render_template('add_community.html')
+
 @main.route('/add-community', methods=['POST'])
 @login_required
 def add_community_subscription():
-    community_name = request.form.get('community_name')
+    community_name = request.form.get('community')
+    # print(f"接收到的表单数据: {request.form}")
     if community_name:
         subscription = CommunitySubscription(
             name=community_name,
@@ -47,7 +52,7 @@ def add_community_subscription():
         )
         db.session.add(subscription)
         db.session.commit()
-        return jsonify({'success': True})
+        return redirect(url_for('main.index'))
     return jsonify({'success': False, 'message': '小区名称不能为空'})
 
 @main.route('/delete-community/<int:subscription_id>', methods=['POST'])
@@ -181,7 +186,8 @@ def register():
             username=username,
             email=email
         )
-        user.password = password  # 使用属性设置器
+        # user.password = password  # 使用属性设置器
+        user.password_hash = generate_password_hash(password)
         
         # 检查是否是第一个用户
         if User.query.count() == 0:
@@ -211,8 +217,12 @@ def logout():
 @admin_required
 def admin():
     users = User.query.all()
-    subscriptions = CommunitySubscription.query.all()
-    return render_template('admin.html', users=users, subscriptions=subscriptions)
+    community_subscriptions = CommunitySubscription.query.all()
+    email_subscriptions = EmailSubscription.query.all()
+    return render_template('admin.html',
+                         users=users,
+                         community_subscriptions=community_subscriptions,
+                         email_subscriptions=email_subscriptions)
 
 @main.route('/admin/delete-user/<int:user_id>', methods=['POST'])
 @login_required
@@ -220,7 +230,7 @@ def admin():
 def admin_delete_user(user_id):
     user = User.query.get_or_404(user_id)
     if user.id == current_user.id:
-        return jsonify({'success': False, 'message': '不能删��当前登录的管理员账号'})
+        return jsonify({'success': False, 'message': '不能删除当前登录的管理员账号'})
     
     try:
         # 删除用户的所有订阅
