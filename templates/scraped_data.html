@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>爬虫数据</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/languages/json.min.js"></script>
+    <script>hljs.highlightAll();</script>
+</head>
+<body class="bg-gray-100">
+    <header class="bg-white shadow">
+        <div class="container mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold text-blue-600">爬虫抓取的数据</h1>
+        </div>
+    </header>
+    <main class="container mx-auto px-4 py-6">
+        <div class="bg-white p-4 rounded-lg shadow">
+            <pre><code class="json">{{ data | safe }}</code></pre>
+        </div>
+        <div class="flex justify-between mt-4">
+            <a href="{{ url_for('main.scraped_data', page=page-1) }}" class="bg-blue-500 text-white px-4 py-2 rounded {{ 'opacity-50 cursor-not-allowed' if page <= 1 else '' }}">上一页</a>
+            <a href="{{ url_for('main.scraped_data', page=page+1) }}" class="bg-blue-500 text-white px-4 py-2 rounded">下一页</a>
+        </div>
+    </main>
+    <footer class="bg-white shadow mt-6">
+        <div class="container mx-auto px-4 py-4 text-center">
+            <p class="text-gray-600">&copy; 2023 我的博客. 保留所有权利。</p>
+        </div>
+    </footer>
+</body>
+</html> 
