@@ -16,10 +16,10 @@ config.read('config.ini')
 def job():
     print(f"开始执行邮件发送任务: {datetime.now()}")
     # 获取昨天的日期作为查询范围
-    yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+    # yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
     today = datetime.now().strftime("%Y-%m-%d")
     # 发送昨天到今天的更新报告
-    send_community_updates(yesterday, today)
+    send_community_updates(today, today)
 
 def run_scheduler():
     # 获取配置的发送时间
@@ -33,9 +33,12 @@ def run_scheduler():
 
     while True:
         schedule.run_pending()
-        time.sleep(60)  # 每分钟检查一次
+        time.sleep(30)  # 每30检查一次
 
 if __name__ == '__main__':
-    # run_scheduler() 
-    job()
+    # 运行定时任务
+    print("开始运行定时任务...")
+    #run_scheduler() 
+    print("定时任务运行完毕。")
+
     

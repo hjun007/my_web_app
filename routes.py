@@ -1,9 +1,10 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, current_app
 from crawler.simple_crawler import scrape_data
 from models import db, Community, EmailSubscription
 import json
 import configparser
 from datetime import datetime
+from scheduler.task_scheduler import job
 
 # 读取配置文件
 config = configparser.ConfigParser()
@@ -94,3 +95,11 @@ def delete_email(email_id):
     db.session.delete(email_sub)
     db.session.commit()
     return jsonify({'success': True})
+
+@main.route('/trigger-job')
+def trigger_job():
+    print("开始手动触发任务...")
+    with current_app.app_context():
+        job()
+    print("任务已触发")
+    return "任务已触发"
