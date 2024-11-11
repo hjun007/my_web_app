@@ -95,12 +95,12 @@
                              class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                             <div class="py-1">
                                 {% if current_user.is_admin %}
-                                <a href="{{ url_for('main.admin') }}" 
+                                <a href="{{ url_for('admin.admin_index') }}" 
                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     后台管理
                                 </a>
                                 {% endif %}
-                                <a href="{{ url_for('main.logout') }}" 
+                                <a href="{{ url_for('auth.logout') }}" 
                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     退出登录
                                 </a>
@@ -109,11 +109,11 @@
                     </div>
                 {% else %}
                     <div class="space-x-4">
-                        <a href="{{ url_for('main.login') }}" 
+                        <a href="{{ url_for('auth.login') }}" 
                            class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
                             登录
                         </a>
-                        <a href="{{ url_for('main.register') }}" 
+                        <a href="{{ url_for('auth.register') }}" 
                            class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
                             注册
                         </a>

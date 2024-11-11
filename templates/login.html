@@ -19,7 +19,7 @@
                 {% endif %}
             {% endwith %}
             
-            <form method="POST" action="{{ url_for('main.login') }}" class="space-y-4">
+            <form method="POST" action="{{ url_for('auth.login') }}" class="space-y-4">
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2">邮箱</label>
                     <input type="email" name="email" required 
@@ -40,7 +40,7 @@
             
             <p class="mt-4 text-center text-gray-600">
                 还没有账号？
-                <a href="{{ url_for('main.register') }}" class="text-blue-500 hover:text-blue-600">注册</a>
+                <a href="{{ url_for('auth.register') }}" class="text-blue-500 hover:text-blue-600">注册</a>
             </p>
         </div>
     </div>
