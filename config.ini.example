@@ -5,8 +5,8 @@ port = 5000
 
 [scheduler]
 # 每天发送邮件的时间，24小时制
-send_hour = 22
-send_minute = 00
+send_hour = 19
+send_minute = 20
 
 [crawler]
 url = https://zwfw.fgj.hangzhou.gov.cn/jjhygl/webty/WebFyAction_getGpxxSelectList.jspx
