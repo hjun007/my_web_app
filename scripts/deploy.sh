@@ -14,10 +14,6 @@ fi
 # 加载环境变量
 source .env
 
-# 创建必要的目录
-mkdir -p nginx
-mkdir -p ssl
-
 # 停止现有容器
 docker-compose down
 
