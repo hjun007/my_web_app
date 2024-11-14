@@ -53,3 +53,11 @@
     page: 1
     xqid: 0
 }
+
+#部署
+```
+git clone xxx
+git checkout v1.0.0
+vim config.ini #改邮箱密码
+./scripts/deploy.sh
+```
