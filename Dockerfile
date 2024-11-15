@@ -1,5 +1,13 @@
-
 FROM python:3.9-alpine
+
+# 设置时区
+ENV TZ=Asia/Shanghai
+
+# 安装 tzdata
+RUN apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/${TZ} /etc/localtime && \
+    echo "${TZ}" > /etc/timezone && \
+    apk del tzdata
 
 WORKDIR /app
 

@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>房源监控</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <script>
@@ -73,6 +74,82 @@
                 });
             }
         }
+
+        function updatePushTime(event) {
+            event.preventDefault();
+            const hourInput = document.getElementById('push-hour');
+            const minuteInput = document.getElementById('push-minute');
+            const timeDisplay = document.getElementById('current-push-time');
+            
+            if (!hourInput || !minuteInput || !timeDisplay) {
+                console.error('找不到必要的DOM元素');
+                return;
+            }
+
+            const hour = parseInt(hourInput.value);
+            const minute = parseInt(minuteInput.value);
+            
+            // 验证输入
+            if (isNaN(hour) || hour < 0 || hour > 23 || isNaN(minute) || minute < 0 || minute > 59) {
+                alert('请输入有效的时间！');
+                return;
+            }
+            
+            fetch('/update-push-time', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `push_hour=${hour}&push_minute=${minute}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    timeDisplay.textContent = `推送时间：每天 ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    alert('推送时间设置成功！');
+                } else {
+                    alert(data.error || '设置失败，请重试！');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('设置失败，请重试！');
+            });
+        }
+
+        // 页面加载时设置当前推送时间
+        document.addEventListener('DOMContentLoaded', function() {
+            // 确保元素存在
+            const hourInput = document.getElementById('push-hour');
+            const minuteInput = document.getElementById('push-minute');
+            const timeDisplay = document.getElementById('current-push-time');
+            
+            if (!hourInput || !minuteInput || !timeDisplay) {
+                console.error('找不到必要的DOM元素');
+                return;
+            }
+
+            fetch('/get-push-time')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const hour = data.hour;
+                        const minute = data.minute;
+                        
+                        // 设置输入框的值
+                        hourInput.value = hour.toString().padStart(2, '0');
+                        minuteInput.value = minute.toString().padStart(2, '0');
+                        
+                        // 更新显示的当前时间
+                        timeDisplay.textContent = `推送时间：每天 ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    } else {
+                        console.error('获取推送时间失败:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('获取推送时间失败:', error);
+                });
+        });
     </script>
 </head>
 <body class="bg-gray-100">
@@ -82,9 +159,9 @@
         </div>
     </header>
     <main class="container mx-auto px-4 py-6">
-        <div class="flex gap-6">
+        <div class="flex flex-col lg:flex-row gap-6">
             <!-- 左侧订阅列表 -->
-            <div class="w-1/3 space-y-6">
+            <div class="w-full lg:w-1/3 space-y-6">
                 <!-- 小区订阅部分 -->
                 <div class="bg-white rounded-lg shadow p-4">
                     <h2 class="text-xl font-bold mb-4">小区订阅</h2>
@@ -111,16 +188,20 @@
                 <!-- 邮箱订阅部分 -->
                 <div class="bg-white rounded-lg shadow p-4">
                     <h2 class="text-xl font-bold mb-4">邮箱订阅</h2>
-                    <form onsubmit="addEmail(event)" class="mb-4">
-                        <div class="flex gap-2">
+                    <form onsubmit="addEmail(event)" class="mb-4 space-y-4">
+                        <!-- 邮箱输入 -->
+                        <div class="flex flex-col sm:flex-row gap-2">
                             <input type="email" id="new-email" required
-                                   class="flex-grow px-3 py-2 border rounded"
+                                   class="w-full px-3 py-2 border rounded"
                                    placeholder="输入邮箱地址">
-                            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                            <button type="submit" 
+                                    class="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 whitespace-nowrap">
                                 添加
                             </button>
                         </div>
                     </form>
+                    
+                    <!-- 邮箱列表 -->
                     <div class="space-y-2">
                         {% for email in emails %}
                         <div class="p-3 bg-gray-50 rounded flex justify-between items-center">
@@ -133,10 +214,41 @@
                         {% endfor %}
                     </div>
                 </div>
+                <div class="bg-white rounded-lg shadow p-4">
+                    <h2 class="text-xl font-bold mb-4">推送时间设置</h2>
+                    <!-- 时间设置 -->
+                    <div class="space-y-2">
+                        <h3 id="current-push-time" class="text-sm font-medium text-gray-500">推送时间：每天 --:--</h3>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <div class="flex-1 flex gap-2 items-center">
+                                <input type="number" 
+                                       id="push-hour" 
+                                       min="0" 
+                                       max="23" 
+                                       class="w-20 px-3 py-2 border rounded"
+                                       placeholder="时"
+                                       required>
+                                <span class="text-gray-500">:</span>
+                                <input type="number" 
+                                       id="push-minute" 
+                                       min="0" 
+                                       max="59" 
+                                       class="w-20 px-3 py-2 border rounded"
+                                       placeholder="分"
+                                       required>
+                            </div>
+                            <button type="button" 
+                                    onclick="updatePushTime(event)"
+                                    class="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 whitespace-nowrap">
+                                保存时间
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- 右侧详情展示 -->
-            <div class="w-2/3 bg-white rounded-lg shadow p-4">
+            <div class="w-full lg:w-2/3 bg-white rounded-lg shadow p-4">
                 <div id="details-container" class="min-h-[400px]">
                     <p class="text-gray-500 text-center mt-8">请选择左侧小区查看详情</p>
                 </div>

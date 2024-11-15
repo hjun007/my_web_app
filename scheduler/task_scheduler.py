@@ -3,12 +3,13 @@ import os
 # 添加项目根目录到Python路径
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import schedule
 import time
 from datetime import datetime, timedelta
 import configparser
 from mailer.email_sender import send_community_updates
-
+from flask import current_app
+import pytz
+from globals import globals
 # 读取配置文件
 config = configparser.ConfigParser()
 config.read('config.ini')
@@ -22,18 +23,23 @@ def job():
     send_community_updates(today, today)
 
 def run_scheduler():
-    # 获取配置的发送时间
-    send_hour = config.getint('scheduler', 'send_hour')
-    send_minute = config.getint('scheduler', 'send_minute')
+    china_tz = pytz.timezone('Asia/Shanghai')
     
-    # 设置每天固定时间运行
-    schedule.every().day.at(f"{send_hour:02d}:{send_minute:02d}").do(job)
-    
-    print(f"定时任务已启动，将在每天 {send_hour:02d}:{send_minute:02d} 发送邮件")
+    current_app.logger.info(f"定时任务已启动，将在每天 {globals.push_time['hour']}:{globals.push_time['minute']} 发送邮件")
 
     while True:
-        schedule.run_pending()
-        time.sleep(30)  # 每30检查一次
+        try:
+            send_hour, send_minute = globals.push_time['hour'], globals.push_time['minute']
+            current_hour, current_minute = datetime.now(china_tz).hour, datetime.now(china_tz).minute
+            if current_hour == send_hour and current_minute == send_minute:
+                job()
+                time.sleep(30)
+            else:
+                time.sleep(30)
+            
+        except Exception as e:
+            print(f"定时任务运行出错: {e}")
+            time.sleep(60)
 
 if __name__ == '__main__':
     # 运行定时任务

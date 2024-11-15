@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, current_app
 from crawler.simple_crawler import scrape_data
 from models import db, Community, EmailSubscription
-import json
 import configparser
 from datetime import datetime
 from scheduler.task_scheduler import job
+from globals import globals
 
 # 读取配置文件
 config = configparser.ConfigParser()
@@ -25,6 +25,7 @@ def delete_subscription(community_id):
     community = Community.query.get_or_404(community_id)
     db.session.delete(community)
     db.session.commit()
+    current_app.logger.info(f"删除小区订阅: {community_id}")
     return jsonify({'success': True})
 
 @main.route('/community-details')
@@ -62,6 +63,7 @@ def add_subscription():
                 new_community = Community(name=community_name)
                 db.session.add(new_community)
                 db.session.commit()
+                current_app.logger.info(f"添加小区订阅: {community_name}")
             return redirect(url_for('main.hello_world'))
     return render_template('add_subscription.html')
 
@@ -86,7 +88,9 @@ def add_email():
             new_subscription = EmailSubscription(email=email)
             db.session.add(new_subscription)
             db.session.commit()
+            current_app.logger.info(f"添加邮箱订阅: {email}")
             return jsonify({'success': True})
+    current_app.logger.info(f"添加邮箱订阅失败: {email}")
     return jsonify({'success': False})
 
 @main.route('/delete-email/<int:email_id>', methods=['POST'])
@@ -94,6 +98,7 @@ def delete_email(email_id):
     email_sub = EmailSubscription.query.get_or_404(email_id)
     db.session.delete(email_sub)
     db.session.commit()
+    current_app.logger.info(f"删除邮箱订阅: {email_id}")
     return jsonify({'success': True})
 
 @main.route('/trigger-job')
@@ -103,3 +108,44 @@ def trigger_job():
         job()
     print("任务已触发")
     return "任务已触发"
+
+@main.route('/update-push-time', methods=['POST'])
+def update_push_time():
+    try:
+        push_hour = int(request.form.get('push_hour', 22))
+        push_minute = int(request.form.get('push_minute', 0))
+        
+        # 验证输入
+        if not (0 <= push_hour <= 23 and 0 <= push_minute <= 59):
+            raise ValueError('无效的时间值')
+            
+        globals.update_push_time(push_hour, push_minute)
+        
+        current_app.logger.info(f"推送时间已更新为: {push_hour}:{push_minute}")
+        return jsonify({
+            'success': True,
+            'hour': push_hour,
+            'minute': push_minute
+        })
+    except Exception as e:
+        current_app.logger.error(f"更新推送时间失败: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })
+
+@main.route('/get-push-time')
+def get_push_time():
+    try:
+        current_app.logger.info(f"获取推送时间: {globals.push_time['hour']}:{globals.push_time['minute']}")
+        return jsonify({
+            'success': True,
+            'hour': globals.push_time['hour'],
+            'minute': globals.push_time['minute']
+        })
+    except Exception as e:
+        current_app.logger.error(f"获取推送时间失败: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })

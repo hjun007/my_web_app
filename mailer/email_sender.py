@@ -33,7 +33,7 @@ def send_email(subject, recipients, body):
     with app.app_context():
         msg = Message(subject, recipients=recipients, body=body)
         mail.send(msg)
-        #print(f"邮件已发送到: {recipients}")
+        print(f"邮件已发送到: {recipients}")
 
 def send_community_updates(starttime, endtime):
     """
@@ -92,7 +92,7 @@ def send_community_updates(starttime, endtime):
     
     try:
         send_email(subject, recipients, email_content)
-        print(f"更新报告已发送给 {len(recipients)} 个订阅者")
+        print(f"更新报告已发送给订阅者{recipients}")
     except Exception as e:
         print(f"发送邮件时出错: {e}")
 
